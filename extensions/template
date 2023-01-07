@@ -1,0 +1,32 @@
+#Global Imports
+import sys,os,time,re,random,nextcord
+#Specific Imports
+from nextcord.ext import commands,application_checks
+from nextcord import Interaction,ClientCog
+from nextcord.ext.application_checks import *
+
+from dotenv import load_dotenv
+from colorama import Fore, Back, Style
+#Local Imports
+from  Internal import console,database,utilities
+
+load_dotenv()
+
+
+
+class Template(commands.Cog):
+    def __init__(self, client):
+        self.client = client
+    
+    #Commands
+
+
+
+def setup(client):
+    client.add_cog(Template(client))
+    
+
+
+
+
+#Functions
