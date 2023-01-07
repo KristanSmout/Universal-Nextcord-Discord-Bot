@@ -30,6 +30,26 @@ A Discord bot created using Python and the Nextcord library.
 3. Create a file called `.env` and fill in the necessary environment variables (see below).
 4. Run the bot using `python main.py`.
 
+## Environment Variables
+
+The following environment variables should be set in the `.env` file:
+
+- `DISCORD_TOKEN`: the Discord bot token
+- `PREFIX`: the desired command prefix for the bot (e.g. `!`)
+- `DEBUG`: a Boolean value indicating whether debug mode should be enabled
+- `GUILD_ID`: the ID of the Discord server
+- `APPLICATION_ID`: the ID of the Discord application
+- `PUBLIC_KEY`: the public key for the Discord application
+- `CLIENT_ID`: the client ID for the Discord application
+- `CLIENT_SECRET`: the client secret for the Discord application
+- `BOT_TOKEN`: the bot token for the Discord application
+- `INVITE_URL`: the URL to use to invite the bot to a server
+- `SERVER_ID`: the ID of the Discord server
+- `SQL_IP`: the IP address of the SQL server
+- `SQL_DB`: the name of the SQL database
+- `SQL_Username`: the username to use when connecting to the SQL database
+- `SQL_Password`: the password to use when connecting to the SQL database
+
 ## Usage
 
 To use the bot, simply launch the program and invite it to your discord server, or invite the public one with [Future URL HERE]
