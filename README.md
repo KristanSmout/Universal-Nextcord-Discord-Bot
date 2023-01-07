@@ -8,7 +8,7 @@ A Discord bot created using Python and the Nextcord library.
 - `README.md`: the README file for the project
 - `requirements.txt`: a text file that lists the required Python packages for the project
 - `extensions`: a directory that contains Python files for additional functionality for the bot
-- `template`: a fo;e within the `extensions` directory that contains templates adding functionality
+- `template`: a template file within the `extensions` directory that contains the extension template to add custom functionality
 - `Internal`: a directory that contains Python files for internal functionality for the bot, these are required for functionality
 
 ## Prerequisites
