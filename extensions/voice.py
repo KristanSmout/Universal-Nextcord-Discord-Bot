@@ -1,7 +1,7 @@
 #Global Imports
 import sys,os,time,re,random,nextcord
 #Specific Imports
-from nextcord.ext import commands,application_checks
+from nextcord.ext import commands,application_checks,tasks
 from nextcord import Interaction,ClientCog
 from nextcord.ext.application_checks import *
 
@@ -17,12 +17,14 @@ max_bitrate = int(os.environ['VOICE_BITRATE']) * 1000
 class Voice(commands.Cog):
     def __init__(self, client):
         self.client = client
+        self.channel_cleanup.start()
     
     #Commands    
     @nextcord.slash_command(name="deletevoice",description="Delete a temporary voice channel")
-    async def delete_voice_channel(self, interaction: nextcord.Interaction, maxusers: str):
+    async def delete_voice_channel(self, interaction: nextcord.Interaction, channelid: str):
         if(await permissions.can_run_command(self,interaction,utilities.get_current_function())):
-            await delete_voice(interaction,str(maxusers))
+            await delete_voice(interaction,str(channelid))
+            await interaction.send(f"Channel Deleted",ephemeral=True)
     
     @nextcord.slash_command(name="createvoice",description="Create a temporary voice channel")
     async def create_temp_voice_channel(self, interaction: nextcord.Interaction, maxusers: int):
@@ -44,7 +46,14 @@ class Voice(commands.Cog):
                 await interaction.send(f"Channel Created, Join Here <#{str(temp_channel.id)}>",ephemeral=True)
             except:
                 await interaction.send(f"Channel Created, Join Here <#{str(temp_channel.id)}>",ephemeral=True)
-        
+
+    @tasks.loop(seconds=10.0)
+    async def channel_cleanup(self):
+        console.print_warning("channel_cleanup Starting")
+        for guild in self.client.guilds:
+            #pass
+            await voice_cleanup(guild)
+
     
 
     
@@ -76,5 +85,25 @@ async def delete_voice(interaction,voice_channel_id,reason="Not Provided"):
         await database.WriteTable(f"DELETE FROM Voice WHERE VoiceID = {voice_channel_id};",database=f"{str(interaction.guild_id)}_Discord")
     except Exception as e:
         console.print_error(f"Unable to delete voice channel: {voice_channel_id} due to \n {e}")
+
+async def voice_cleanup(guild):
+    id = str(guild.id)
+    #channel_list = list(await database.ReadTable("SELECT VoiceID FROM Voice WHERE TIMESTAMPDIFF(SECOND, CreatedDateTime, NOW()) > 30;",database=f"{id}_Discord"))
+    #exists = await database.ReadTableNow(f"SELECT COUNT(*) FROM Voice",database=f"{str(id)}_Discord")
+    channel_list = await database.ReadTableNow("SELECT VoiceID FROM Voice WHERE TIMESTAMPDIFF(SECOND, CreatedDateTime, NOW()) > 30",database=f"{id}_Discord")
+    temporary_channels = [x[0] for x in channel_list]
+    for channel in guild.voice_channels:
+        if(str(channel.id) in temporary_channels):
+            if(len(channel.members) < 1):
+                try:
+                    await channel.delete(reason="Unused Temporary Channel")
+                    await console.print_debug_async(f"Deleted {channel.name}")
+                    await database.WriteTable(f"DELETE FROM Voice WHERE VoiceID = {channel.id};",database=f"{str(guild.id)}_Discord")
+                except:
+                    console.print_error_async(f"Unable to delete {channel.name}")
+            else:
+                await console.print_debug_async(f"Has Members {channel.name}")
+
+    
 
 

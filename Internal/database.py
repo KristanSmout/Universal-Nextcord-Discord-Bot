@@ -46,6 +46,7 @@ async def createdatabase(database,host=os.environ['SQL_IP'],user=os.environ['SQL
         
     # Create a cursor to execute queries
     cursor = await connection.cursor()
+    databases = await cursor.fetchall()
     if (database) in str(databases):
         console.print_debug(f"{database} exists!")
     else:
@@ -112,14 +113,17 @@ async def WriteTable(query,database,host=os.environ['SQL_IP'],user=os.environ['S
     connection.close()
 
 async def ReadTable(query,database,host=os.environ['SQL_IP'],user=os.environ['SQL_Username'],password=os.environ['SQL_Password']):
-    connection = await aiomysql.connect(
-        host=host,
-        user=user,
-        password=password,
-        db=database,
-        charset='utf8',
-        use_unicode=True
-    )
+    try:
+        connection = await aiomysql.connect(
+            host=host,
+            user=user,
+            password=password,
+            db=database,
+            charset='utf8',
+            use_unicode=True
+        )
+    except Exception as e:
+        console.print_error(f"Cannot Connect to DB: {e}")
     console.print_debug(f"Reading Query: {query} to {database}")
     cursor = await connection.cursor()
     await cursor.execute(query)
@@ -128,7 +132,32 @@ async def ReadTable(query,database,host=os.environ['SQL_IP'],user=os.environ['SQ
     connection.close()
     if result is None:
         console.error(f"database: {database} | query: {query} has no results")
-        return None
+        return 0
     else:
         return result
 
+
+async def ReadTableNow(query, database, host=os.environ['SQL_IP'],user=os.environ['SQL_Username'],password=os.environ['SQL_Password']):
+    # Connect to the database
+    conn = await aiomysql.connect(
+        host=host,
+        user=user,
+        password=password,
+        db=database,
+    )
+
+    # Create a cursor
+    cur = await conn.cursor()
+
+    # Execute the SELECT query
+    await cur.execute(query)
+
+    # Fetch all the results from the SELECT query
+    rows = await cur.fetchall()
+
+    # Close the cursor and connection
+    await cur.close()
+    conn.close()
+
+    # Return the results
+    return rows

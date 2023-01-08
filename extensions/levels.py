@@ -34,7 +34,7 @@ class Levels(commands.Cog):
         try:
             await interaction.response.send_message(f"Your Level is {str(level)}, you have {str(xp)}/{str(LevelXP * level)} XP of the required XP to level up!",ephemeral=True)
         except Exception as e:
-            console.print_error(e)
+            await console.print_error(e)
             await interaction.response.send_message(f"Your Level is {str(level)}, you have {str(xp)}/{str(LevelXP * level)} XP of the required XP to level up!",ephemeral=True)
 
     @nextcord.slash_command(name="addxp",description="Add XP to a user")
@@ -71,12 +71,12 @@ async def DoesUserHaveDBEntry(UserID,GuildID):
     try:
         xplevel = await database.ReadTable(query=f"SELECT XP,Level FROM Levels WHERE UserID = {UserID}",database=f"{GuildID}_Discord")
     except:
-        console.print_warning(f"Creating new Database {GuildID}_Discord ")
+        await console.print_warning(f"Creating new Database {GuildID}_Discord ")
         await database.createdatabase(f"{GuildID}_Discord")
-        console.print_warning(f"Creating new Table Levels")
+        await console.print_warning(f"Creating new Table Levels")
         await database.CreateTable(f"Levels","UserID VARCHAR(255), Level VARCHAR(255), XP VARCHAR(255)",database=f"{GuildID}_Discord")
     finally:
-        console.print_debug("IS CONTINUE")
+        await console.print_debug("IS CONTINUE")
         xplevel = await database.ReadTable(query=f"SELECT XP,Level FROM Levels WHERE UserID = {UserID}",database=f"{GuildID}_Discord")
     if(len(xplevel) == 0):
         xp = 0

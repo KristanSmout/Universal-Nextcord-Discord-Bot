@@ -27,7 +27,7 @@ class Permissions(commands.Cog):
                 await database.WriteTable(f"INSERT INTO Permissions (CommandID, MinimumRole, Exclusive) VALUES ('{command}', '{utilities.process_mention(role)}', '{int(exclusive)}') ON DUPLICATE KEY UPDATE MinimumRole = '{utilities.process_mention(role)}', Exclusive = {int(exclusive)};",f"{interaction.guild_id}_Discord")
                 await interaction.send("Permission Added",ephemeral=True)
             except Exception as e:
-                console.print_error(e)
+                await console.print_error(e)
                 await interaction.send(f'Error: {e}',ephemeral=True)
 
 

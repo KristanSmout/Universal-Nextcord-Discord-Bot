@@ -64,6 +64,7 @@ async def main():
 
 if __name__ == "__main__":
     load_dotenv()
+    
     os.system("cls")
     
     console.print_message("Application Started")
