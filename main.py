@@ -19,6 +19,7 @@ initial_extensions = []
 async def on_ready():
     #await sync_modules()
     console.print_message("Online!")
+    await client.change_presence(activity=nextcord.Streaming(name="Looking for contributors",url="https://github.com/KristanSmout/Universal-Nextcord-Discord-Bot"))
 
 def version_check():
     console.print_debug("Starting Version Check")

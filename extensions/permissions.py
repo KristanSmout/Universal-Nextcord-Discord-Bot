@@ -21,9 +21,7 @@ class Permissions(commands.Cog):
     
     #Commands
     @nextcord.slash_command(name="addpermission",description="Add a command permission")
-    #@application_checks.has_guild_permissions(administrator=True)
     async def add_permission_command(self, interaction: nextcord.Interaction, role: str, command: str , exclusive: bool):
-        await perms.check_db(interaction.guild.id)
         if(await perms.can_run_command(self,interaction,utilities.get_current_function())):
             try:
                 await database.WriteTable(f"INSERT INTO Permissions (CommandID, MinimumRole, Exclusive) VALUES ('{command}', '{utilities.process_mention(role)}', '{int(exclusive)}') ON DUPLICATE KEY UPDATE MinimumRole = '{utilities.process_mention(role)}', Exclusive = {int(exclusive)};",f"{interaction.guild_id}_Discord")
@@ -31,7 +29,6 @@ class Permissions(commands.Cog):
             except Exception as e:
                 console.print_error(e)
                 await interaction.send(f'Error: {e}',ephemeral=True)
-            #database.WriteTable(f"",f"{interaction.guild.id}_Discord",)
 
 
 
@@ -45,7 +42,3 @@ def setup(client):
 
 
 #Functions
-    # Get the member object for the user
-
-async def UpdatePermission(command_id,guild_id,role_id,Exclusive):
-    pass

@@ -1,4 +1,4 @@
-import re,inspect
+import re,inspect,datetime
 from . import console
 
 def str_to_bool(message):
@@ -26,3 +26,26 @@ def process_mention(mention):
 
 def get_current_function():
     return inspect.stack()[1][3]
+
+def generate_sql_datetime(dt=None):
+    try:
+        if(dt == None):
+            now = datetime.datetime.now()
+            sql_datetime_str = now.strftime("%Y-%m-%d %H:%M:%S")
+            return sql_datetime_str
+        else:
+            return dt.strftime("%Y-%m-%d %H:%M:%S")
+    except Exception as e:
+        console.print_error(f"Error Parsing Datetime: {e}")
+
+async def get_text_channel(interaction,channel_id):
+    for channel in interaction.guild.text_channels:
+        if(channel.id == int(channel_id)):
+            return channel
+    return None
+
+async def get_voice_channel(interaction,channel_id):
+    for channel in interaction.guild.voice_channels:
+        if(channel.id == int(channel_id)):
+            return channel
+    return None

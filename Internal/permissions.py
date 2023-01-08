@@ -1,16 +1,11 @@
 from . import database,console
 
-
-async def check_db(guild_id):
-    await database.CreateTable("Permissions","CommandID VARCHAR(255) NOT NULL PRIMARY KEY, MinimumRole VARCHAR(255) NOT NULL, Exclusive BOOL NOT NULL",f"{str(guild_id)}_Discord")
-    return "done"
-
 async def can_run_command(self,interaction,command_id):
-    test = await check_db(interaction.guild.id)
     try:
         if(interaction.permissions.administrator == True):
             return True
         else:
+            await database.CreateTable("Permissions","CommandID VARCHAR(255) NOT NULL PRIMARY KEY, MinimumRole VARCHAR(255) NOT NULL, Exclusive BOOL NOT NULL",f"{str(interaction.guild.id)}_Discord")
             minimum_role_id = await database.ReadTable(f"SELECT * FROM Permissions WHERE CommandID = '{command_id}'",f"{interaction.guild.id}_Discord")
             if(len(minimum_role_id)>0):
                 if(minimum_role_id[0][2] == 1):
