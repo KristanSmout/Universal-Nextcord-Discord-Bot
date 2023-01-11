@@ -8,7 +8,7 @@ from nextcord.ext.application_checks import *
 from dotenv import load_dotenv
 from colorama import Fore, Back, Style
 #Local Imports
-from  Internal import console,database,utilities
+from  Internal import console,database,utilities,permissions
 
 load_dotenv()
 
@@ -19,7 +19,6 @@ class Template(commands.Cog):
         self.client = client
     
     #Commands
-
 
 
 def setup(client):

@@ -47,13 +47,12 @@ class Voice(commands.Cog):
             except:
                 await interaction.send(f"Channel Created, Join Here <#{str(temp_channel.id)}>",ephemeral=True)
 
-    @tasks.loop(seconds=10.0)
+    @tasks.loop(seconds=60.0)
     async def channel_cleanup(self):
         console.print_warning("channel_cleanup Starting")
         for guild in self.client.guilds:
             #pass
             await voice_cleanup(guild)
-
     
 
     

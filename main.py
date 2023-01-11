@@ -10,6 +10,7 @@ from Internal import console,database
 version = "0.0.1"
 #Bot Init
 intents = nextcord.Intents.all()
+intents.reactions = True
 intents.members = True
 client = commands.Bot(intents=intents, default_guild_ids=[1025485715993272330])
 
