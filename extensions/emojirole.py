@@ -20,16 +20,28 @@ class emojirole(commands.Cog):
     
     #Commands    
     @nextcord.slash_command(name="createemojirole",description="Create a emoji role ")
-    async def delete_voice_channel(self, interaction: nextcord.Interaction, identifier: str, channelid: str,messageid: str, emoji: str, role: str):
+    async def create_rule(self, interaction: nextcord.Interaction, identifier: str, channelid: str,messageid: str, emoji: str, role: str):
         if(await permissions.can_run_command(self,interaction,utilities.get_current_function())):
             await create_emojirole_rule(interaction,identifier,channelid,messageid,emoji,role)
             await interaction.send(f"Created",ephemeral=True)
             interaction.channel_id
     
     @nextcord.slash_command(name="deleteemojirole",description="delete a emoji role ")
-    async def delete_voice_channel(self, interaction: nextcord.Interaction, identifier: str):
+    async def delete_rule(self, interaction: nextcord.Interaction, identifier: str):
         if(await permissions.can_run_command(self,interaction,utilities.get_current_function())):
             await delete_emojirole_rule(interaction,identifier)
+            await interaction.send(f"Deleted",ephemeral=True)
+    
+    @nextcord.slash_command(name="addemojirole",description="add a role to existing rule ")
+    async def add_rule(self, interaction: nextcord.Interaction, identifier: str, roles: str):
+        if(await permissions.can_run_command(self,interaction,utilities.get_current_function())):
+            await add_emojirole_rule(interaction,identifier,roles)
+            await interaction.send(f"Deleted",ephemeral=True)
+    
+    @nextcord.slash_command(name="removeemojirole",description="remove a role to existing rule ")
+    async def remove_rule(self, interaction: nextcord.Interaction, identifier: str, roles: str):
+        if(await permissions.can_run_command(self,interaction,utilities.get_current_function())):
+            await remove_emojirole_rule(interaction,identifier,roles)
             await interaction.send(f"Deleted",ephemeral=True)
 
     @commands.Cog.listener()
@@ -66,7 +78,68 @@ async def create_emojirole_rule(interaction,identifer,channel_id,message_id, emo
         else:
             await database.WriteTable(f"INSERT INTO EmojiRole (Identifier, ChannelID ,MessageID, EmojiID,RoleIDs) VALUES ('{identifer}', '{str(channel_id)}' ,'{str(message_id)}', '{str(emoji_id)}','{str(role_id)}')",f"{interaction.guild_id}_Discord")
             await add_emoji(interaction,channel_id,message_id,emoji_id)
+    except Exception as e:
+        await interaction.send(f"Error: {e}",ephemeral=True)
 
+async def add_emojirole_rule(interaction,identifier,role_id):
+    await create_table(interaction)
+    #Check if ID Exists
+    try:
+        entry = await database.ReadTable(f"SELECT COUNT(*) FROM EmojiRole WHERE Identifier = '{identifier}'",database=f"{str(interaction.guild.id)}_Discord")
+        count = entry[0][0]
+        if(count == 0):
+            await interaction.send(f"Entry does not exist, please create",ephemeral=True)
+        else:
+            try:
+                currentroles = await database.ReadTable(f"SELECT RoleIDs FROM EmojiRole WHERE Identifier = '{identifier}' LIMIT 1",database=f"{str(interaction.guild.id)}_Discord")
+                roles = currentroles[0][0]
+                roles = roles.split(',')
+
+                role_id = role_id.replace('><','>,<')
+                role_id = role_id.split(',')
+
+                combined = roles + role_id
+
+                final_str = ""
+                for role in combined:
+                    final_str = final_str + role + ","
+                final_str = final_str[:-1]
+
+                await database.WriteTable(f"UPDATE EmojiRole SET RoleIDs = '{final_str}' WHERE Identifier = '{identifier}'",database=f"{str(interaction.guild.id)}_Discord")
+                await interaction.send(f"Added!",ephemeral=True)
+            except Exception as e:
+                 await interaction.send(f"Error: {e}",ephemeral=True)
+    except Exception as e:
+        await interaction.send(f"Error: {e}",ephemeral=True)
+
+async def remove_emojirole_rule(interaction,identifier,role_id):
+    await create_table(interaction)
+    #Check if ID Exists
+    try:
+        entry = await database.ReadTable(f"SELECT COUNT(*) FROM EmojiRole WHERE Identifier = '{identifier}'",database=f"{str(interaction.guild.id)}_Discord")
+        count = entry[0][0]
+        if(count == 0):
+            await interaction.send(f"Entry does not exist, please create",ephemeral=True)
+        else:
+            try:
+                currentroles = await database.ReadTable(f"SELECT RoleIDs FROM EmojiRole WHERE Identifier = '{identifier}' LIMIT 1",database=f"{str(interaction.guild.id)}_Discord")
+                roles = currentroles[0][0]
+                roles = roles.split(',')
+
+                role_id = role_id.replace('><','>,<')
+                role_id = role_id.split(',')
+
+                combined = [x for x in roles if x not in role_id]
+
+                final_str = ""
+                for role in combined:
+                    final_str = final_str + role + ","
+                final_str = final_str[:-1]
+
+                await database.WriteTable(f"UPDATE EmojiRole SET RoleIDs = '{final_str}' WHERE Identifier = '{identifier}'",database=f"{str(interaction.guild.id)}_Discord")
+                await interaction.send(f"Added!",ephemeral=True)
+            except Exception as e:
+                 await interaction.send(f"Error: {e}",ephemeral=True)
     except Exception as e:
         await interaction.send(f"Error: {e}",ephemeral=True)
 
