@@ -76,7 +76,7 @@ async def DoesUserHaveDBEntry(UserID,GuildID):
         await console.print_warning(f"Creating new Table Levels")
         await database.CreateTable(f"Levels","UserID VARCHAR(255), Level VARCHAR(255), XP VARCHAR(255)",database=f"{GuildID}_Discord")
     finally:
-        await console.print_debug("IS CONTINUE")
+        await console.print_debug_async("IS CONTINUE")
         xplevel = await database.ReadTable(query=f"SELECT XP,Level FROM Levels WHERE UserID = {UserID}",database=f"{GuildID}_Discord")
     if(len(xplevel) == 0):
         xp = 0

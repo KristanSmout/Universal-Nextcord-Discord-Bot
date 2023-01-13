@@ -36,7 +36,7 @@ def test_connection(host=os.environ['SQL_IP'],user=os.environ['SQL_Username'],pa
             console.print_debug("MySQL connection closed")
 
 async def createdatabase(database,host=os.environ['SQL_IP'],user=os.environ['SQL_Username'],password=os.environ['SQL_Password']):
-    console.print_message(f"Creating new database '{database}'")
+    await console.print_message_async(f"Creating new database '{database}'")
     connection = await aiomysql.connect(
         host=host, 
         user=user, 
@@ -48,7 +48,7 @@ async def createdatabase(database,host=os.environ['SQL_IP'],user=os.environ['SQL
     cursor = await connection.cursor()
     databases = await cursor.fetchall()
     if (database) in str(databases):
-        console.print_debug(f"{database} exists!")
+        await console.print_debug_async(f"{database} exists!")
     else:
         # Create the database
         await cursor.execute(f"CREATE DATABASE IF NOT EXISTS {database}")
@@ -56,9 +56,9 @@ async def createdatabase(database,host=os.environ['SQL_IP'],user=os.environ['SQL
         await cursor.execute(f"SHOW DATABASES")
         databases = await cursor.fetchall()
         if (database) in str(databases):
-            console.print_message(f"{database} has been created successfully")
+            await console.print_message_async(f"{database} has been created successfully")
         else:
-            console.print_error(f"Error creating {database}")
+            await console.print_message_async(f"Error creating {database}")
 
     # Close the cursor and connection
     await cursor.close()
@@ -85,16 +85,16 @@ async def CreateTable(table,columns,database=os.environ['SQL_DB'],host=os.enviro
             await cursor.execute(f"SHOW TABLES")
             tables = cursor.fetchall()
             if (table) in str(tables):
-                console.print_debug(f"{table} Exists")
+                await console.print_debug_async(f"{table} Exists")
             else:
-                console.print_error(f"Error creating {table}")
+                await console.print_error_async(f"Error creating {table}")
 
         # Close the cursor and connection
         await cursor.close()
         connection.close()
     except Exception as e:
         temp = e
-        console.print_error(f"{e}")
+        await console.print_error_async(f"{e}")
 
 async def WriteTable(query,database,host=os.environ['SQL_IP'],user=os.environ['SQL_Username'],password=os.environ['SQL_Password']):
     connection = await aiomysql.connect(
@@ -105,7 +105,7 @@ async def WriteTable(query,database,host=os.environ['SQL_IP'],user=os.environ['S
         charset='utf8',
         use_unicode=True
     )
-    console.print_debug(f"Writing Query: {query} to {database}")
+    await console.print_debug_async(f"Writing Query: {query} to {database}")
     cursor = await connection.cursor()
     await cursor.execute(query)
     await connection.commit()
@@ -123,15 +123,15 @@ async def ReadTable(query,database,host=os.environ['SQL_IP'],user=os.environ['SQ
             use_unicode=True
         )
     except Exception as e:
-        console.print_error(f"Cannot Connect to DB: {e}")
-    console.print_debug(f"Reading Query: {query} to {database}")
+        await console.print_error_async(f"Cannot Connect to DB: {e}")
+    await console.print_debug_async(f"Reading Query: {query} to {database}")
     cursor = await connection.cursor()
     await cursor.execute(query)
     result = await cursor.fetchall()
     await cursor.close()
     connection.close()
     if result is None:
-        console.error(f"database: {database} | query: {query} has no results")
+        await console.print_error_async(f"database: {database} | query: {query} has no results")
         return 0
     else:
         return result
