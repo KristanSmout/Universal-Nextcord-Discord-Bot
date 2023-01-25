@@ -29,6 +29,9 @@ class Permissions(commands.Cog):
             except Exception as e:
                 await console.print_error(e)
                 await interaction.send(f'Error: {e}',ephemeral=True)
+    
+    
+
 
 
 

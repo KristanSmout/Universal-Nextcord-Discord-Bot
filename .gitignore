@@ -1,4 +1,6 @@
 **/__pycache__/
 *.env
 test.py
-.gitignore.bak
+.gitignore
+*.gitignore.bak
+*.bak
