@@ -50,7 +50,7 @@ class emojirole(commands.Cog):
     
     @commands.Cog.listener()
     async def on_raw_reaction_remove(locals,payload):
-        await console.print_message_async("Emoji was removed")
+        await remove_emoji_role(locals,payload)
 
 
 def setup(client):
@@ -76,7 +76,12 @@ async def create_emojirole_rule(interaction,identifer,channel_id,message_id, emo
         if(count != 0):
             await interaction.send(f"Entry already exists, please modify instead",ephemeral=True)
         else:
-            await database.WriteTable(f"INSERT INTO EmojiRole (Identifier, ChannelID ,MessageID, EmojiID,RoleIDs) VALUES ('{identifer}', '{str(channel_id)}' ,'{str(message_id)}', '{str(emoji_id)}','{str(role_id)}')",f"{interaction.guild_id}_Discord")
+            #Convert to Just Name
+            if emoji_id.startswith('<:'):
+                emoji_id_db = emoji_id.replace('<:','')
+                emoji_id_db = emoji_id_db.replace('>','')
+                emoji_id_db = emoji_id_db.split(':')[0]
+            await database.WriteTable(f"INSERT INTO EmojiRole (Identifier, ChannelID ,MessageID, EmojiID,RoleIDs) VALUES ('{identifer}', '{str(channel_id)}' ,'{str(message_id)}', '{str(emoji_id_db)}','{str(role_id)}')",f"{interaction.guild_id}_Discord")
             await add_emoji(interaction,channel_id,message_id,emoji_id)
     except Exception as e:
         await interaction.send(f"Error: {e}",ephemeral=True)
@@ -189,3 +194,22 @@ async def assign_emoji_role(locals,payload):
             roles.append(localrole)
             #await payload.member.add_roles(localrole,reason=f"EmojiRole: {identifier[0][0]}")
         await payload.member.add_roles(*roles,reason=f"EmojiRole: {identifier[0][0]}")
+
+async def remove_emoji_role(locals,payload):
+    entry = await database.ReadTable(f"SELECT COUNT(*) FROM EmojiRole WHERE ChannelID = '{payload.channel_id}' AND MessageID = '{payload.message_id}' AND EmojiID = '{payload.emoji.name}'",database=f"{str(payload.guild_id)}_Discord")
+    if(entry[0][0] != 0):
+        guild = await locals.client.fetch_guild(payload.guild_id)
+        identifier = await database.ReadTable(f"SELECT Identifier FROM EmojiRole WHERE ChannelID = '{payload.channel_id}' AND MessageID = '{payload.message_id}' AND EmojiID = '{payload.emoji.name}'",database=f"{str(payload.guild_id)}_Discord")
+        sqlroles = await database.ReadTable(f"SELECT RoleIDs FROM EmojiRole WHERE ChannelID = '{payload.channel_id}' AND MessageID = '{payload.message_id}' AND EmojiID = '{payload.emoji.name}'",database=f"{str(payload.guild_id)}_Discord")
+        all_roles = sqlroles[0][0].split(',')
+        roles = []
+        for role in all_roles:
+            id = int(utilities.process_mention(role))
+            temp = id
+            localrole = guild.get_role(id)
+            roles.append(localrole)
+            #await payload.member.remove_roles(localrole,reason=f"EmojiRole: {identifier[0][0]}")
+        #Get member object from payload.user_id
+        member = await guild.fetch_member(payload.user_id)    
+        #await member.remove_roles("<@&1057034017603584096>",reason=f"EmojiRole: {identifier[0][0]}")
+        await member.remove_roles(*roles,reason=f"EmojiRole: {identifier[0][0]}")

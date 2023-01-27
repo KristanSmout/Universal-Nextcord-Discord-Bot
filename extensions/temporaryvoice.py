@@ -14,7 +14,7 @@ load_dotenv()
 
 max_bitrate = int(os.environ['VOICE_BITRATE']) * 1000
 
-class Voice(commands.Cog):
+class TemporaryVoiceChannels(commands.Cog):
     def __init__(self, client):
         self.client = client
         self.channel_cleanup.start()
@@ -61,7 +61,7 @@ class Voice(commands.Cog):
 
 
 def setup(client):
-    client.add_cog(Voice(client))
+    client.add_cog(TemporaryVoiceChannels(client))
     
 
 #Functions
@@ -87,8 +87,6 @@ async def delete_voice(interaction,voice_channel_id,reason="Not Provided"):
 
 async def voice_cleanup(guild):
     id = str(guild.id)
-    #channel_list = list(await database.ReadTable("SELECT VoiceID FROM Voice WHERE TIMESTAMPDIFF(SECOND, CreatedDateTime, NOW()) > 30;",database=f"{id}_Discord"))
-    #exists = await database.ReadTableNow(f"SELECT COUNT(*) FROM Voice",database=f"{str(id)}_Discord")
     channel_list = await database.ReadTableNow("SELECT VoiceID FROM Voice WHERE TIMESTAMPDIFF(SECOND, CreatedDateTime, NOW()) > 30",database=f"{id}_Discord")
     temporary_channels = [x[0] for x in channel_list]
     for channel in guild.voice_channels:
